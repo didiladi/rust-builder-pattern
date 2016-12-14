@@ -7,6 +7,7 @@ const SPEED_OF_LIGHT: u64 = 299_792_458; // m/s
 const DEFAULT_DISCOVERED_BY: &'static str = "Unknown";
 const DEFAULT_DISCOVERED_YEAR: u16 = 2017;
 
+#[derive(Clone)]
 enum Type {
 
     SuperMassive,
@@ -115,6 +116,21 @@ impl<'a> BlackHoleBuilder<'a> {
             classification:     self.classification
         }
     }
+
+    fn build_copy(&self) -> BlackHole<'a> {
+        BlackHole {
+
+            name:               self.name,
+            discovered_by:      self.discovered_by.unwrap_or(DEFAULT_DISCOVERED_BY),
+            year_of_discovery:  self.year_of_discovery.unwrap_or(DEFAULT_DISCOVERED_YEAR),
+
+            mass:               self.mass,
+            angular_momentum:   self.angular_momentum,
+            electric_charge:    self.electric_charge,
+
+            classification:     self.classification.clone()
+        }
+    }
 }
 
 impl<'a> BlackHole<'a> {
@@ -142,6 +158,16 @@ fn main() {
 
     println!("Black hole {} has an event horizon radius of: {}", black_hole.name,
          black_hole.calc_event_horizon_radius().unwrap_or(0.0));
+
+    let black_hole_builder = BlackHoleBuilder::new("Gargantua")
+        .discovered_by("Dr. Mann")
+        .mass(123456789.0)
+        .classification(None);
+
+    let clone1 = black_hole_builder.build_copy();
+    let clone2 = black_hole_builder.build_copy();
+    // TODO equals
+
 
     // TODO documentation
     // TODO tests are still missing
