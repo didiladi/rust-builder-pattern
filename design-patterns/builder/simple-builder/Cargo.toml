@@ -1,0 +1,6 @@
+[package]
+name = "simple-builder"
+version = "0.1.0"
+authors = ["Dieter Ladenhauf <ladenhauf@protonmail.com>"]
+
+[dependencies]

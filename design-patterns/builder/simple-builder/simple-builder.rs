@@ -1,4 +1,3 @@
-
 use std::f64;
 
 const GRAVITATIONAL_CONSTANT: f64 = 0.00000000006674; // N*m^2/kg^2
@@ -9,7 +8,6 @@ const DEFAULT_DISCOVERED_YEAR: u16 = 2017;
 
 #[derive(Clone)]
 enum Type {
-
     SuperMassive,
     IntermediateMassive,
     Stellar,
@@ -143,7 +141,6 @@ impl<'a> BlackHole<'a> {
     ///        c ^ 2
     ///
     fn calc_event_horizon_radius(&self) -> Option<f64> {
-        // TODO check the calculation
         self.mass.map(|mass| (2.0 * GRAVITATIONAL_CONSTANT * mass) / (SPEED_OF_LIGHT.pow(2) as f64))
     }
 }
@@ -180,6 +177,7 @@ fn main() {
     // what if we want to create multiple black holes with the same builder? (the black hole owns now the stuff) -> see blueprint
     // no real-life scenario (visibility) - BlackHole should be in a different crate
     // Adding of lifetimes makes code more difficult to read
+    // we can mess with the internals of BlackHole if we want
 
     // +
     // Into works quite well
@@ -188,4 +186,5 @@ fn main() {
     // Default values can be used (see discovered_by and year_of_discovery
     // By using Option<?> we can indicate that a value is optional and must not necessarily be set
     // String is now &str (However, we now must ensure that BlackHole doesn't outlive name and discovered_by
+    // for clone we just have to pass in a reference build_copy and derive the enum from Clone
 }
