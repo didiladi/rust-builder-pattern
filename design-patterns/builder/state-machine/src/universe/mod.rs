@@ -214,7 +214,7 @@ impl BlackHoleBuilder<OptionalParamsBuilder> {
     /// let black_hole_2 = builder.classification(Type::Massive)
     ///                           .build_copy();
     ///
-    /// assert_eq!(black_hole_1, bloack_hole_2);                   
+    /// assert_eq!(black_hole_1, black_hole_2);                   
     /// ```
     pub fn build_copy(&self) -> BlackHole {
         
