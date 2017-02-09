@@ -1,11 +1,8 @@
 
-use std::f64;
-use std::convert::From;
-
-const INITIAL_NAME: &'static str = "Unknown";
+const UNKNOWN: &'static str = "Unknown";
 const DEFAULT_DISCOVERED_YEAR: u16 = 2017;
 
-/// The type of a black hole
+/// the type of a black hole
 #[derive(Clone, Debug, PartialEq)]
 pub enum Type {
     SuperMassive,
@@ -53,145 +50,84 @@ pub struct BlackHole {
     pub classification: Option<Type>
 }
 
-/// This trait is used for the different states the builder of a black
-/// hole can be in. Using this technique ensures that all the necessary
-/// filds on the resulting black hole are set.
-pub trait State {}
+impl BlackHole {
 
-
-pub struct NameBuilder;
-impl State for NameBuilder {}
-
-pub struct DiscoveredByBuilder;
-impl State for DiscoveredByBuilder {}
-
-impl From<NameBuilder> for DiscoveredByBuilder {
-    fn from(_: NameBuilder) -> DiscoveredByBuilder {
-        DiscoveredByBuilder
-    }
-}
-
-pub struct YearOfDiscoveryBuilder;
-impl State for YearOfDiscoveryBuilder {}
-
-impl From<DiscoveredByBuilder> for YearOfDiscoveryBuilder {
-    fn from(_: DiscoveredByBuilder) -> YearOfDiscoveryBuilder { 
-        YearOfDiscoveryBuilder
-    }
-}
-
-pub struct OptionalParamsBuilder;
-impl State for OptionalParamsBuilder {}
- 
-impl From<YearOfDiscoveryBuilder> for OptionalParamsBuilder {
-    fn from(_: YearOfDiscoveryBuilder) -> OptionalParamsBuilder { 
-        OptionalParamsBuilder
-    }
-}
-
-/// This is the builder of a black hole
-pub struct BlackHoleBuilder<S: State> {
-    black_hole: BlackHole,
-    #[allow(dead_code)]
-    state: S
-}
-
-impl<T: State> BlackHoleBuilder<T> {
-    fn transition<X: State + From<T>>(self, state: X) -> BlackHoleBuilder<X> {
-        BlackHoleBuilder {
-            black_hole: self.black_hole,
-            state: state
-        }
-    }
-}
-
-impl BlackHoleBuilder<NameBuilder> {
- 
-    /// Constructs a new black hole builder
-    /// 
-    /// # Examples
-    /// 
-    /// ```
-    /// let black_hole = BlackHole::new()
-    ///     .name("Gargantua")
-    ///     .discovered_by("Dr. Mann")
-    ///     .year_of_discovery(2400)
-    ///     .mass(123456789.0)
-    ///     .classification(Type::SuperMassive)
-    ///     .angular_momentum(12345.0)
-    ///     .build();
-    /// ```
-    fn new() -> Self {
-
-        BlackHoleBuilder {
-            black_hole : BlackHole {
-                name:               INITIAL_NAME.to_string(),
-                discovered_by:      INITIAL_NAME.to_string(),
+    /// Constructs a new builder for a black hole
+    pub fn new() -> NameBuilder {
+        NameBuilder {
+            black_hole: BlackHole {
+                name:               UNKNOWN.to_string(),
+                discovered_by:      UNKNOWN.to_string(),
                 year_of_discovery:  DEFAULT_DISCOVERED_YEAR,
                 mass:               None,
                 angular_momentum:   None,
                 electric_charge:    None,
                 classification:     None
-            },
-            state : NameBuilder
+            }
         }
     }
+}
 
-    /// Sets the name of the black hole
-    pub fn name(mut self, name: &str) -> BlackHoleBuilder<DiscoveredByBuilder> {
+pub struct NameBuilder {
+    black_hole: BlackHole
+}
+
+impl NameBuilder {
+
+    /// Sets the name of the black hole. Returns a DiscoveredByBuilder.
+    pub fn name(mut self, name: &str) -> impl DiscoveredByBuilder {
         self.black_hole.name = name.to_string();
-        self.transition(DiscoveredByBuilder)
-    }
-}
-
-impl BlackHoleBuilder<DiscoveredByBuilder> {
-
-    /// Sets the name of the person/institution who discovered the black hole
-    pub fn discovered_by(mut self, discovered_by: &str) -> BlackHoleBuilder<YearOfDiscoveryBuilder> {
-        self.black_hole.discovered_by = discovered_by.to_string();
-        self.transition(YearOfDiscoveryBuilder)
-    }
-}
-
-impl BlackHoleBuilder<YearOfDiscoveryBuilder> {
-
-    /// Sets the year of discovery of the black hole
-    pub fn year_of_discovery(mut self, year_of_discovery: u16) -> BlackHoleBuilder<OptionalParamsBuilder> {
-        self.black_hole.year_of_discovery = year_of_discovery;
-        self.transition(OptionalParamsBuilder)
-    }
-}
-
-impl BlackHoleBuilder<OptionalParamsBuilder> {
-
-    /// Sets the mass of the black hole
-    pub fn mass(mut self, mass: f64) -> Self {
-        self.black_hole.mass = Some(mass);
         self
     }
+}
+
+pub trait DiscoveredByBuilder {
+
+    /// Sets the name of the person who discovered the black hole. Returns a
+    /// YearOfDiscoveryBuilder.
+    fn discovered_by(mut self, discovered_by: &str) -> YearOfDiscoveryBuilder;
+}
+
+impl DiscoveredByBuilder for NameBuilder {
+    fn discovered_by(mut self, discovered_by: &str) -> YearOfDiscoveryBuilder {
+        self.black_hole.discovered_by = discovered_by.to_string();
+        YearOfDiscoveryBuilder {
+            black_hole: self.black_hole
+        }
+    }
+}
+
+pub struct YearOfDiscoveryBuilder {
+    black_hole: BlackHole
+}
+
+impl YearOfDiscoveryBuilder {
+    
+    /// Sets the year of discovery of the black hole. Returns a BlackHoleBuilder, which enables you
+    /// to set a bunch of optional fields on the black hole
+    pub fn year_of_discovery(mut self, year_of_discovery: u16) -> impl BlackHoleBuilder {
+        self.black_hole.year_of_discovery = year_of_discovery;
+        self
+    }
+}
+
+/// This builder enables one to set a bunch of optional fields for the balck hole.
+pub trait BlackHoleBuilder {
+    
+    /// Sets the mass of the black hole
+    fn mass(mut self, mass: f64) -> Self;
 
     /// Sets the angular momentum of the black hole
-    pub fn angular_momentum(mut self, angular_momentum: f64) -> Self {
-        self.black_hole.angular_momentum = Some(angular_momentum);
-        self
-    }
+    fn angular_momentum(mut self, angular_momentum: f64) -> Self;
 
     /// Sets the electric charge of the black hole
-    pub fn electric_charge(mut self, electric_charge: f64) -> Self {
-        self.black_hole.electric_charge = Some(electric_charge);
-        self
-    }
+    fn electric_charge(mut self, electric_charge: f64) -> Self;
 
     /// Sets the type of the black hole
-    pub fn classification(mut self, classification: Type) -> Self {
-        self.black_hole.classification = Some(classification);
-        self
-    }
+    fn classification(mut self, classification: Type) -> Self;
 
-    /// Builds the black hole
-    pub fn build(self) -> BlackHole {
-        self.black_hole
-    }
+    /// Build the black hole
+    fn build(self) -> BlackHole;
 
     /// Builds a copy of the black hole. This function does not take ownership
     /// of the builder and therefore enables you to build multiple black holes 
@@ -210,33 +146,51 @@ impl BlackHoleBuilder<OptionalParamsBuilder> {
     /// let black_hole_1 = builder.build_copy();
     /// let black_hole_2 = builder.classification(Type::Massive)
     ///                           .build_copy();
-    ///
-    /// assert_eq!(black_hole_1, black_hole_2);                   
     /// ```
-    pub fn build_copy(&self) -> BlackHole {
-        
-        BlackHole {
+    fn build_copy(&self) -> BlackHole;
+}
 
+impl BlackHoleBuilder for YearOfDiscoveryBuilder {
+    
+    fn mass(mut self, mass: f64) -> Self {
+        self.black_hole.mass = Some(mass);
+        self
+    }
+
+    fn angular_momentum(mut self, angular_momentum: f64) -> Self {
+        self.black_hole.angular_momentum = Some(angular_momentum);
+        self
+    }
+
+    fn electric_charge(mut self, electric_charge: f64) -> Self {
+        self.black_hole.electric_charge = Some(electric_charge);
+        self
+    }
+
+    fn classification(mut self, classification: Type) -> Self {
+        self.black_hole.classification = Some(classification);
+        self
+    }
+
+    fn build(self) -> BlackHole {
+        self.black_hole
+    }
+
+    fn build_copy(&self) -> BlackHole {
+        BlackHole {
+        
             name:               self.black_hole.name.clone(),
             discovered_by:      self.black_hole.discovered_by.clone(),
             year_of_discovery:  self.black_hole.year_of_discovery,
-
+            
             mass:               self.black_hole.mass,
             angular_momentum:   self.black_hole.angular_momentum,
             electric_charge:    self.black_hole.electric_charge,
-
-            classification:     self.black_hole.classification.clone()
+            
+            classification:      self.black_hole.classification.clone(),
         }
     }
 }
-
-impl BlackHole {
-
-    pub fn new() -> BlackHoleBuilder<NameBuilder> {
-        BlackHoleBuilder::new()
-    }
-}
-
 
 #[cfg(test)]
 mod tests {
@@ -276,7 +230,6 @@ mod tests {
             .electric_charge(2345.6)
             .angular_momentum(12345.0);
 
-
         let black_hole_1 = builder.build_copy();
         let black_hole_2 = builder.build_copy();
 
@@ -289,3 +242,5 @@ mod tests {
         assert_eq!(black_hole_1.angular_momentum, black_hole_2.angular_momentum);
     }
 }
+
+

@@ -1,7 +1,7 @@
 
 pub mod universe;
 
-use universe::{Type, BlackHoleBuilder};
+use universe::BlackHoleBuilder;
 
 fn main() {
 
@@ -11,9 +11,6 @@ fn main() {
         .classification(None)
         .build();
 
-    println!("Black hole {} has an event horizon radius of: {}", black_hole.name,
-         black_hole.calc_event_horizon_radius().unwrap_or(0.0));
-
     let black_hole_builder = BlackHoleBuilder::new("Gargantua")
         .discovered_by("Dr. Mann".to_string())
         .mass(123456789.0)
@@ -21,13 +18,8 @@ fn main() {
 
     let clone1 = black_hole_builder.build_copy();
     let clone2 = black_hole_builder.build_copy();
-    // TODO equals
-
-
-    // TODO documentation
-    // TODO tests are still missing
-    // TODO can we do anything about the unused compiler warnings? Use the stuff?
-    // TODO create a crate?
+    
+    assert_eq!(clone1, clone2);
 
     // -
     // the builder needs to have the same fields as the original struct

@@ -1,9 +1,6 @@
 
 use std::f64;
 
-const GRAVITATIONAL_CONSTANT: f64 = 0.00000000006674; // N*m^2/kg^2
-const SPEED_OF_LIGHT: u64 = 299_792_458; // m/s
-
 const DEFAULT_DISCOVERED_BY: &'static str = "Unknown";
 const DEFAULT_DISCOVERED_YEAR: u16 = 2017;
 
@@ -205,17 +202,6 @@ impl BlackHoleBuilder {
 }
 
 impl BlackHole {
-
-    /// Calculate the radius of the event horizon, commonly referred as 'Schwarzschild radius'
-    /// See: https://en.wikipedia.org/wiki/Schwarzschild_radius
-    ///
-    ///      2 * G * M
-    /// rs = ---------
-    ///        c ^ 2
-    ///
-    pub fn calc_event_horizon_radius(&self) -> Option<f64> {
-        self.mass.map(|mass| (2.0 * GRAVITATIONAL_CONSTANT * mass) / (SPEED_OF_LIGHT.pow(2) as f64))
-    }
 }
 
 
