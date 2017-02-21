@@ -1,5 +1,5 @@
 
-#![feature(conservative_impl_trait)]
+#![feature(conservative_impl_trait, test)]
 #![allow(warnings)]
 pub mod universe;
 

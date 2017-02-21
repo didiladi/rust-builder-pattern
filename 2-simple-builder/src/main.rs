@@ -1,4 +1,5 @@
 
+#![feature(test)]
 pub mod universe;
 
 use universe::BlackHoleBuilder;

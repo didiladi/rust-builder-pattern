@@ -1,4 +1,6 @@
 
+extern crate test;
+
 const UNKNOWN: &'static str = "Unknown";
 const DEFAULT_DISCOVERED_YEAR: u16 = 2017;
 
@@ -194,7 +196,9 @@ impl BlackHoleBuilder for YearOfDiscoveryBuilder {
 
 #[cfg(test)]
 mod tests {
+    
     use super::*;
+    use self::test::Bencher;
 
     #[test]
     fn new_with_build() {
@@ -240,6 +244,19 @@ mod tests {
         assert_eq!(black_hole_1.classification, black_hole_2.classification);
         assert_eq!(black_hole_1.electric_charge, black_hole_2.electric_charge);
         assert_eq!(black_hole_1.angular_momentum, black_hole_2.angular_momentum);
+    }
+    
+    #[bench]
+    fn bench_create_black_hole(b: &mut Bencher) {
+        b.iter (|| BlackHole::new()
+            .name("Gargantua")
+            .discovered_by("Dr. Mann")
+            .year_of_discovery(2400)
+            .mass(123456789.0)
+            .classification(Type::SuperMassive)
+            .electric_charge(2345.6)
+            .angular_momentum(12345.0)
+            .build());
     }
 }
 
